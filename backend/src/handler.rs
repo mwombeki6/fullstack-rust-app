@@ -46,3 +46,66 @@ pub async fn feedback_list_handler(
     });
     HttpResponse::Ok().json(json_response)
 }
+
+#[post("/feedbacks/")]
+async fn create_feedback_handler(
+    body: web::Json<CreateFeedbackSchema>,
+    data: web::Data<AppState>,
+) -> impl Responder {
+    let query_result = sqlx::query_as!(
+        FeedbackModel,
+        "INSERT INTO feedbacks (text, rating) VALUES ($1, $2) RETURNING *",
+        body.text.to_string(),
+        body.rating,
+    )
+    .fetch_one(&data.db)
+    .await;
+
+    match query_result {
+        Ok(feedback) => {
+            let feedback_response = serde_json::json!({"status": "success", "data": serde_json::json!({
+                "feedback": feedback
+            })});
+
+            return HttpResponse::Ok().json(feedback_response);
+        }
+        Err(e) => {
+            if e.to_string()
+                .contains("duplicate key value violates unique constraint")
+            {
+                return HttpResponse::BadRequest()
+                    .json(serde_json::json!({"status": "error", "message": format!("{:?}", e)}));
+            }
+        }
+    }
+}
+
+#[get("/feedbacks/{id}")]
+async fn get_feedback_handler(
+    path: web::Path<uuid::Uuid>,
+    data: web::Data<AppState>,
+) -> impl Responder {
+    let feedback_id = path.into_inner();
+    let query_result = sqlx::query_as!(
+        FeedbackModel,
+        "SELECT * FROM feedbacks WHERE id = $1",
+        feedback_id
+    )
+    .fetch_one(&data.db)
+    .await;
+
+    match query_result {
+        Ok(feedback) => {
+            let feedback_response = serde_json::json!({"status": "success", "data": serde_json::json!({
+                "feedback": feedback
+            })});
+
+            return HttpResponse::Ok().json(feedback_response);
+        }
+        Err(_) => {
+            let message = format!("feedback with ID: {} not found", feedback_id);
+            return HttpResponse::NotFound()
+                .json(serde_json::json!({"status": "fail", "message": message}));
+        }
+    }
+}
