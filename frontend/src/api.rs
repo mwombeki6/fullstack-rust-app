@@ -81,7 +81,7 @@ pub async fn api_fetch_feedbacks((page, limit): (i32, i32)) -> Result<Vec<Feedba
 
     let res_json = response.json::<FeedbackListResponse>().await;
     match res_json {
-        Ok(data) => Ok(data.feedbacks),
+        Ok(data) => Ok(data.feedback),
         Err(_) => Err("Failed to parse response".to_string()),
     }
 }
