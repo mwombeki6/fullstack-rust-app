@@ -2,6 +2,14 @@
     "rust-analyzer.linkedProjects": [
         "./backend/Cargo.toml",
         "./backend/Cargo.toml",
+        "./frontend/Cargo.toml",
+        "./frontend/Cargo.toml",
+        "./frontend/Cargo.toml",
+        "./frontend/Cargo.toml",
+        "./frontend/Cargo.toml",
+        "./frontend/Cargo.toml",
+        "./frontend/Cargo.toml",
+        "./frontend/Cargo.toml",
         "./frontend/Cargo.toml"
     ]
 }
